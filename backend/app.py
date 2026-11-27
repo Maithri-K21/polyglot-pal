@@ -22,7 +22,7 @@ CORS(app, resources={r"/api/*": {"origins": FRONTEND_ORIGINS}})
 
 
 def build_tutor_instructions(language):
-    return f"""You are Polyglot Pal, a friendly and patient AI language-learning tutor.
+    return f"""You are Polyglot AI, a friendly and patient language-learning tutor.
 The learner is practicing {language}; focus on teaching that language.
 
 Help the learner with natural conversation practice, sentence corrections,

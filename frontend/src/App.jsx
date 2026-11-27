@@ -89,9 +89,9 @@ function App() {
   return (
     <div className="site-shell">
       <header className="site-header">
-        <a className="brand" href="#home" aria-label="Polyglot Pal home">
+        <a className="brand" href="#home" aria-label="Polyglot AI home">
           <BrandMark />
-          <span>polyglot<span className="brand-pal">pal</span></span>
+          <span>polyglot<span className="brand-ai">ai</span></span>
         </a>
         <nav className="main-nav" aria-label="Main navigation">
           <a href="#languages">Languages</a>
@@ -202,7 +202,7 @@ function App() {
       <footer className="site-footer">
         <a className="brand footer-brand" href="#home">
           <BrandMark />
-          <span>polyglot<span className="brand-pal">pal</span></span>
+          <span>polyglot<span className="brand-ai">ai</span></span>
         </a>
         <p>Made with curiosity, for the words that bring us closer.</p>
         <a className="back-to-top" href="#home">Back to top ↑</a>

@@ -7,6 +7,30 @@ const conversationStarters = [
   'Correct my sentence',
 ]
 
+const quizQuestions = {
+  Hindi: [
+    { word: 'नमस्ते', answer: 'Hello', options: ['Hello', 'Goodbye', 'Water', 'Thank you'] },
+    { word: 'धन्यवाद', answer: 'Thank you', options: ['Yes', 'Thank you', 'Hello', 'Water'] },
+    { word: 'पानी', answer: 'Water', options: ['Goodbye', 'Water', 'Thank you', 'Yes'] },
+    { word: 'हाँ', answer: 'Yes', options: ['Water', 'Hello', 'Yes', 'Goodbye'] },
+    { word: 'अलविदा', answer: 'Goodbye', options: ['Thank you', 'Yes', 'Goodbye', 'Hello'] },
+  ],
+  Kannada: [
+    { word: 'ನಮಸ್ಕಾರ', answer: 'Hello', options: ['Hello', 'Goodbye', 'Water', 'Thank you'] },
+    { word: 'ಧನ್ಯವಾದಗಳು', answer: 'Thank you', options: ['Yes', 'Thank you', 'Hello', 'Water'] },
+    { word: 'ನೀರು', answer: 'Water', options: ['Goodbye', 'Water', 'Thank you', 'Yes'] },
+    { word: 'ಹೌದು', answer: 'Yes', options: ['Water', 'Hello', 'Yes', 'Goodbye'] },
+    { word: 'ವಿದಾಯ', answer: 'Goodbye', options: ['Thank you', 'Yes', 'Goodbye', 'Hello'] },
+  ],
+  Tamil: [
+    { word: 'வணக்கம்', answer: 'Hello', options: ['Hello', 'Goodbye', 'Water', 'Thank you'] },
+    { word: 'நன்றி', answer: 'Thank you', options: ['Yes', 'Thank you', 'Hello', 'Water'] },
+    { word: 'தண்ணீர்', answer: 'Water', options: ['Goodbye', 'Water', 'Thank you', 'Yes'] },
+    { word: 'ஆம்', answer: 'Yes', options: ['Water', 'Hello', 'Yes', 'Goodbye'] },
+    { word: 'பிரியாவிடை', answer: 'Goodbye', options: ['Thank you', 'Yes', 'Goodbye', 'Hello'] },
+  ],
+}
+
 const CHAT_API_URL =
   import.meta.env.VITE_CHAT_API_URL || 'http://127.0.0.1:5000/api/chat'
 
@@ -51,7 +75,19 @@ function ChatScreen({ language, onBack }) {
   const [messages, setMessages] = useState([])
   const [statusMessage, setStatusMessage] = useState('')
   const [isSending, setIsSending] = useState(false)
+  const [quizAnswers, setQuizAnswers] = useState({})
+  const [quizSubmitted, setQuizSubmitted] = useState(false)
   const apiIsConfigured = Boolean(CHAT_API_URL)
+  const questions = quizQuestions[language.name]
+  const quizScore = questions.reduce(
+    (score, question, index) => score + (quizAnswers[index] === question.answer ? 1 : 0),
+    0,
+  )
+
+  function resetQuiz() {
+    setQuizAnswers({})
+    setQuizSubmitted(false)
+  }
 
   function chooseStarter(starter) {
     setDraft(starter)
@@ -99,9 +135,9 @@ function ChatScreen({ language, onBack }) {
         <button className="back-button" type="button" onClick={onBack}>
           <span aria-hidden="true">←</span> Back to home
         </button>
-        <a className="chat-brand" href="#home" onClick={onBack} aria-label="Polyglot Pal home">
+        <a className="chat-brand" href="#home" onClick={onBack} aria-label="Polyglot AI home">
           <span className="chat-brand-mark" aria-hidden="true">P</span>
-          <span>polyglot<span>pal</span></span>
+          <span>polyglot<span>ai</span></span>
         </a>
         <span className="language-pill">
           <span className={`language-pill-dot ${language.color}`} />
@@ -131,7 +167,7 @@ function ChatScreen({ language, onBack }) {
           <div className="tutor-bar">
             <div className="tutor-avatar-small" aria-hidden="true">P</div>
             <div>
-              <strong>Polyglot Pal tutor</strong>
+              <strong>Polyglot AI tutor</strong>
               <span>AI language companion · {language.name}</span>
             </div>
             <span className="tutor-language-label">{language.nativeName}</span>
@@ -205,6 +241,62 @@ function ChatScreen({ language, onBack }) {
           {statusMessage && <p className="chat-status" role="alert">{statusMessage}</p>}
           <p className="chat-footnote">A gentle space to learn. Mistakes are part of the conversation.</p>
         </div>
+
+        <section className="quiz-panel" aria-labelledby="quiz-title">
+          <div className="quiz-heading">
+            <p className="starter-label">A QUICK CHECK-IN</p>
+            <h2 id="quiz-title">How much {language.name} have you learned?</h2>
+            <p>Answer these five questions to test your new vocabulary.</p>
+          </div>
+          <div className="quiz-questions">
+            {questions.map((question, index) => (
+              <fieldset className="quiz-question" key={question.word}>
+                <legend>
+                  <span>{index + 1}.</span> What does <strong lang={language.name === 'Hindi' ? 'hi' : language.name === 'Kannada' ? 'kn' : 'ta'}>{question.word}</strong> mean?
+                </legend>
+                <div className="quiz-options">
+                  {question.options.map((option) => (
+                    <label className="quiz-option" key={option}>
+                      <input
+                        type="radio"
+                        name={`quiz-${index}`}
+                        value={option}
+                        checked={quizAnswers[index] === option}
+                        disabled={quizSubmitted}
+                        onChange={() => setQuizAnswers((answers) => ({ ...answers, [index]: option }))}
+                      />
+                      <span>{option}</span>
+                    </label>
+                  ))}
+                </div>
+                {quizSubmitted && (
+                  <p className={`quiz-feedback${quizAnswers[index] === question.answer ? ' correct' : ''}`}>
+                    {quizAnswers[index] === question.answer
+                      ? 'Correct!'
+                      : `The answer is ${question.answer}.`}
+                  </p>
+                )}
+              </fieldset>
+            ))}
+          </div>
+          <div className="quiz-actions">
+            {quizSubmitted ? (
+              <>
+                <p className="quiz-result" role="status">You got {quizScore} out of {questions.length} correct.</p>
+                <button className="quiz-button" type="button" onClick={resetQuiz}>Try again</button>
+              </>
+            ) : (
+              <button
+                className="quiz-button"
+                type="button"
+                disabled={Object.keys(quizAnswers).length !== questions.length}
+                onClick={() => setQuizSubmitted(true)}
+              >
+                Check my answers
+              </button>
+            )}
+          </div>
+        </section>
       </section>
     </main>
   )
